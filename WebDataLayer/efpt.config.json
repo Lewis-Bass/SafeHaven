@@ -1,0 +1,42 @@
+﻿{
+   "ContextClassName": "WebdatalayerContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "DoNotCombineNamespace": false,
+   "IdReplace": false,
+   "IncludeConnectionString": false,
+   "ModelNamespace": null,
+   "OutputContextPath": "DBMS",
+   "OutputPath": "DBMS",
+   "ProjectRootNamespace": "WebDataLayer",
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "HasPrimaryKey": true,
+         "Name": "public.device"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "public.device_ark"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "public.device_information"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "public.license"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "public.opt_in"
+      }
+   ],
+   "UseDatabaseNames": false,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseInflector": false,
+   "UseLegacyPluralizer": false,
+   "UseSpatial": false
+}

@@ -1,0 +1,108 @@
+﻿@model WebDataLayer.Models.CustomerSecure
+@{
+    ViewBag.Title = Model.Title;
+}
+
+<div class="container body-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-xs-12">
+
+            @if (!string.IsNullOrWhiteSpace(ViewBag.Message))
+            {
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="@ViewBag.MessageCss">
+                            @Html.Raw(ViewBag.Message)
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <form method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">General information</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    @Html.DisplayFor(m => m.ValidationErrors, new { @class = "form-control small", maxlength = 128, @readonly = "true" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    @Html.DisplayFor(m => m.Email, new { @class = "form-control small", type = "email", maxlength = 128, placeholder = "The email address for the user", @readonly = "true" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    @Html.TextBoxFor(m => m.Name, new { @class = "form-control small", maxlength = 128, placeholder = "The user name used to log in" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Phone number</label>
+                                    @Html.TextBoxFor(m => m.PhoneNumber, htmlAttributes: new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Update password</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Password</label>
+                                    @Html.PasswordFor(m => m.Password1, new { @class = "form-control small", maxlength = 128, placeholder = "Add new password" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    @Html.PasswordFor(m => m.Password2, new { @class = "form-control small", maxlength = 128, placeholder = "Confirm new password" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 buttons">
+                        <!-- Actions -->
+                        <button type="submit" class="btn btn-labeled btn-success pull-right">
+                            <span class="btn-label">
+                                <i class="fas fa-check"></i>
+                            </span>
+                            <text>Update</text>
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 buttons">
+                        <a class="nav-item nav-link active" asp-area="" asp-controller="OptOut" asp-action="Index">Opt Out</a>
+                    </div>
+                    <div class="col-sm-4 buttons">
+                        <a class="nav-item nav-link active" asp-area="" asp-controller="OptOut" asp-action="View">View Data Collected</a>
+                    </div>
+                </div> 
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,107 @@
+﻿@model PurchaseSecure
+@{
+    ViewData["Title"] = "PurchaseSecure";
+}
+
+<div class="container body-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-xs-12">
+
+            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+            {
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="error">
+                            @Model.ErrorMessage
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
+            {
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div>
+                            @Model.SuccessMessage
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <form method="post">
+                @Html.AntiForgeryToken()
+
+                @Html.HiddenFor(m => m.LicenseId)
+                @Html.HiddenFor(m => m.ProductExpirationDate)
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Current License</h3>
+                    </div>
+                    <div class="panel-body">
+
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Product</label>
+                                    @Html.TextBoxFor(m => m.ProductName, new { @class = "form-control small", maxlength = 128, @readonly = "true" })
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>License Expires on</label>
+                                    @Html.TextBoxFor(m => m.ProductExpirationDateString, new { @class = "form-control small", @readonly = "true" })
+                                </div>
+                            </div>
+                        </div>
+
+                        @*<div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Upgrade License To </label>
+                                <label class="form-control small" maxlength=128>I AM NOT EVEN CLOSE!</label>
+                            </div>
+                        </div>
+                    </div>*@
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Purchase Information</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Credit Card</label>
+                                    @Html.TextBoxFor(m => m.CreditCard, new { @class = "form-control small", maxlength = 128, placeholder = "Credit Card" })
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Security Code</label>
+                                    @Html.TextBoxFor(m => m.SecurityCode, new { @class = "form-control small", maxlength = 128, placeholder = "Security" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 buttons">
+                        <!-- Actions -->
+                        <button type="submit" class="btn btn-labeled btn-success pull-right">
+                            <span class="btn-label">
+                                <i class="fas fa-check"></i>
+                            </span>
+                            <text>Purchase</text>
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,52 @@
+﻿@model WebDataLayer.Models.InfoDetails
+@{
+    ViewData["Title"] = "View";
+}
+
+<div class="container body-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-xs-12">
+
+            @foreach (var device in Model.Devices)
+            {
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3>Data that is stored</h3>
+                        <br />
+                        <h3 class="panel-title">@device.DeviceName</h3>
+
+                    </div>
+                    <div class="panel-body">
+                        @foreach (var type in device.Types)
+                        {
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <h4>@type.InformationType</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            @foreach (var detail in type.Details)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            @detail.InformatiionDisplay
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            @detail.InformationValue
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

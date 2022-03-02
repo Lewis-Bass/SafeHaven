@@ -1,0 +1,30 @@
+﻿[
+  {
+    "outputFile": "wwwroot/assets/css/style.css",
+    "inputFile": "assets/scss/style.scss"
+  },
+  {
+    "outputFile": "assets/scss/_archive.css",
+    "inputFile": "assets/scss/_archive.scss"
+  },
+  {
+    "outputFile": "assets/scss/_base.css",
+    "inputFile": "assets/scss/_base.scss"
+  },
+  {
+    "outputFile": "assets/scss/_colors.css",
+    "inputFile": "assets/scss/_colors.scss"
+  },
+  {
+    "outputFile": "assets/scss/_hero.css",
+    "inputFile": "assets/scss/_hero.scss"
+  },
+  {
+    "outputFile": "assets/scss/_navigation.css",
+    "inputFile": "assets/scss/_navigation.scss"
+  },
+  {
+    "outputFile": "assets/scss/_pagination.css",
+    "inputFile": "assets/scss/_pagination.scss"
+  }
+]

@@ -1,0 +1,92 @@
+﻿
+@using Microsoft.AspNetCore.Mvc.Localization
+@using SharedResourceStrings.Resources
+@using Microsoft.Extensions.Localization
+@using Microsoft.AspNetCore.Localization
+@inject IStringLocalizer<SharedResources>  Localizer
+
+@model WebDataLayer.Models.HealthCheck
+@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="container body-container">
+    <div class="row justify-content-center">
+        @if (Model.Machines != null)
+        {
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-label">
+                            <label>
+                                @Localizer["InstallDevices"]
+                                Install Devices
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-label">
+                            <label>
+                                Available Disk Space
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-label">
+                            <label>
+                                Vaults
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @foreach (var machineInfo in Model.Machines)
+            {
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>
+                                    @machineInfo.MachineName
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            @foreach (var disk in machineInfo.AvailableDiskSpace.Select(r => r.Drive).OrderBy(r => r).Distinct())
+                            {
+                                <div class="container">
+                                    <label>
+                                        @disk Available @(machineInfo.AvailableDiskSpace.OrderByDescending(r => r.ValueDate).First(r => r.Drive == disk).Value / 1000000000) GB
+                                    </label>
+                                    <label style="border:1px solid black;padding:4px;">
+                                        Disk Space Graph
+                                        <div class="row" style="height:110px; margin:inherit;">
+                                            @foreach (var diskInfo in machineInfo.AvailableDiskSpace.Where(r => r.Drive == disk).OrderBy(r => r.ValueDate))
+                                            {
+                                                <div style="margin-right:2px;vertical-align:bottom;background-color:transparent;height:110px;width:5px;">
+                                                    &nbsp;
+                                                    <div style="position:absolute;bottom:10px;margin-right:5px;vertical-align:bottom;background-color:blueviolet;height:@(diskInfo.PctOfMax)px;width:5px;">
+                                                        &nbsp;
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </label>
+
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-4">
+                            @foreach (var vaultInfo in machineInfo.Vaults)
+                            {
+                                <label>
+                                    @vaultInfo.VaultName
+                                </label>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

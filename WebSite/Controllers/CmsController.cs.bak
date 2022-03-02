@@ -1,0 +1,358 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Piranha;
+using Piranha.Models;
+using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using CommonLibraries.Extensions;
+using Microsoft.EntityFrameworkCore;
+
+namespace WebSite.Controllers
+{
+    public class CmsController : Controller
+    {
+
+        #region Piranha
+
+        private readonly IApi _api;
+        private readonly IDb _db;
+
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        /// <param name="app">The current app</param>
+        public CmsController(IApi api, IDb db)
+        {
+            _api = api;
+            _db = db;
+        }
+
+        /// <summary>
+        /// Gets the blog archive with the given id.
+        /// </summary>
+        /// <param name="id">The unique page id</param>
+        /// <param name="year">The optional year</param>
+        /// <param name="month">The optional month</param>
+        /// <param name="page">The optional page</param>
+        /// <param name="category">The optional category</param>
+        /// <param name="tag">The optional tag</param>
+        [Route("archive")]
+        public async Task<IActionResult> Archive(Guid id, int? year = null, int? month = null, int? page = null,
+            Guid? category = null, Guid? tag = null)
+        {
+            var model = await _api.Pages.GetByIdAsync<Models.BlogArchive>(id);
+            model.Archive = await _api.Archives.GetByIdAsync(id, page, category, tag, year, month);
+
+            return View(model);
+        }
+
+        /// <summary>
+        /// Gets the page with the given id.
+        /// </summary>
+        /// <param name="id">The unique page id</param>
+        [Route("page")]
+        public async Task<IActionResult> Page(Guid id)
+        {
+            var model = await _api.Pages.GetByIdAsync<Models.StandardPage>(id);
+
+            return View(model);
+        }
+
+        /// <summary>
+        /// Gets the page with the given id.
+        /// </summary>
+        /// <param name="id">The unique page id</param>
+        [Route("pagewide")]
+        public async Task<IActionResult> PageWide(Guid id)
+        {
+            var model = await _api.Pages.GetByIdAsync<Models.StandardPage>(id);
+
+            return View(model);
+        }
+
+        /// <summary>
+        /// Gets the post with the given id.
+        /// </summary>
+        /// <param name="id">The unique post id</param>
+        ///
+        [Route("post")]
+        public async Task<IActionResult> Post(Guid id)
+        {
+            var model = await _api.Posts.GetByIdAsync<Models.BlogPost>(id);
+
+            return View(model);
+        }
+
+        /// <summary>
+        /// Gets the teaser page with the given id.
+        /// </summary>
+        /// <param name="id">The page id</param>
+        /// <param name="startpage">If this is the startpage of the site</param>
+        [Route("teaserpage")]
+        public async Task<IActionResult> TeaserPage(Guid id, bool startpage = false)
+        {
+            var model = await _api.Pages.GetByIdAsync<Models.TeaserPage>(id);
+
+            if (startpage)
+            {
+                var latest = _db.Posts
+                    .Where(p => p.Published <= DateTime.Now)
+                    .OrderByDescending(p => p.Published)
+                    .Take(1)
+                    .Select(p => p.Id);
+                if (latest.Count() > 0)
+                {
+                    model.LatestPost = await _api.Posts
+                        .GetByIdAsync<PostInfo>(latest.First());
+                }
+                return View("startpage", model);
+            }
+            return View(model);
+        }
+
+        #endregion
+
+
+
+        #region Additional Routes
+
+        #region Customer Secure
+
+        [Route("customersecure")]
+        [Authorize(Roles = "Customer")]
+        [HttpGet]
+        public IActionResult CustomerSecure(Guid id)
+        {
+            // get pirahna model info
+            var model = _api.Pages.GetById<Models.CustomerSecure>(id);
+            ClaimsPrincipal currentUser = this.User;
+
+            // add the information from our user account
+            using (var dbms = new WebDataLayer.DBMS.WebDataLayerContext())
+            {
+                var license = dbms.License.FirstOrDefault(r => r.Email == currentUser.Identity.Name);
+                if (license != null)
+                {
+                    model.Email = license.Email;
+                    model.Name = license.Name;
+                    model.PhoneNumber = license.PhoneNumber;
+                }
+            }
+
+            return View(model);
+        }
+
+        [Route("customersecure")]
+        [Authorize(Roles = "Customer")]
+        [HttpPost]
+        public async Task<IActionResult> CustomerSecure(Guid id, Models.CustomerSecure model)
+        {
+            ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+            // update piranha passwords
+            if (model.Password1 == model.Password2 && !string.IsNullOrWhiteSpace(model.Password1) && !string.IsNullOrWhiteSpace(model.Password2))
+            {
+                await _userManager.RemovePasswordAsync(user);
+                await _userManager.AddPasswordAsync(user, model.Password1);
+            }
+            else if (model.Password1 != model.Password2 && !string.IsNullOrWhiteSpace(model.Password1) && !string.IsNullOrWhiteSpace(model.Password2))
+            {
+                ErrorMessage($"The new passwords do not match. {model.Password1} - {model.Password2}", false);
+            }
+
+            // update our account
+            using (var dbms = new WebDataLayer.DBMS.WebDataLayerContext())
+            {
+                var license = dbms.License.FirstOrDefault(r => r.Email == currentUser.Identity.Name);
+                if ((license != null) && ((license.Name != model.Name) || (license.PhoneNumber != model.PhoneNumber)))
+                {
+                    license.Name = model.Name;
+                    license.PhoneNumber = model.PhoneNumber;
+                    await dbms.SaveChangesAsync();
+                }
+            }
+
+            // the model needs to be setup again because of piranha sections
+            var modelout = _api.Pages.GetById<Models.CustomerSecure>(id);
+            modelout.Name = model.Name;
+            modelout.Email = model.Email;
+            modelout.PhoneNumber = model.PhoneNumber;
+            SetupViewData();
+
+            return View(modelout);
+        }
+
+        #endregion
+
+        #region PurchaseSecure
+
+        [Route("purchasesecure")]
+        [Authorize(Roles = "Customer")]
+        [HttpGet]
+        public IActionResult PurchaseSecure(Guid id)
+        {
+            // get pirahna model info
+            var model = _api.Pages.GetById<Models.PurchaseSecure>(id);
+
+            // add the information from our user account
+            ClaimsPrincipal currentUser = this.User;
+            using (var dbms = new WebDataLayer.DBMS.WebDataLayerContext())
+            {
+                var license = dbms.License.FirstOrDefault(r => r.Email == currentUser.Identity.Name);
+                if (license != null)
+                {
+                    model.ProductName = $"Vault {license.MaxDevicesSupported}";
+                    model.ProductExpirationDate = license.ExpirationDate.HasValue ?
+                        license.ExpirationDate.Value.ToDateTime() : DateTime.Today;
+                    model.LicenseId = license.LicenseId;
+                }
+            }
+
+            return View(model);
+        }
+
+        [Route("purchasesecure")]
+        [Authorize(Roles = "Customer")]
+        [HttpPost]
+        //public async Task<IActionResult> PurchaseSecure(Guid id, Models.PurchaseSecure model)
+        public IActionResult PurchaseSecure(Guid id, Models.PurchaseSecure model)
+        {
+            // card and security present
+            if (string.IsNullOrWhiteSpace(model.CreditCard) || string.IsNullOrWhiteSpace(model.SecurityCode))
+            {
+                ErrorMessage($"Credit Card and Security Code are Required.", false);
+            }
+            else
+            {
+                var purchase = new WebLibraries.CardProcessing.PurchaseLicense();
+                if (purchase.Purchase(model.LicenseId, model.CreditCard, model.SecurityCode, 0))
+                {
+                    SuccessMessage($"{model.ProductName} has been purchased");
+                }
+                else
+                {
+                    ErrorMessage("Purchase can not be completed at this time -Credit Card Denied");
+                }
+            }
+
+            var modelOut = _api.Pages.GetById<Models.PurchaseSecure>(id);
+            modelOut.ProductName = model.ProductName;
+            modelOut.ProductExpirationDate = model.ProductExpirationDate;
+            modelOut.LicenseId = model.LicenseId;
+            SetupViewData();
+            return View(modelOut);
+        }
+
+        #endregion
+
+        #region VaultSecure
+        [Route("vaultsecure")]
+        [Authorize(Roles = "Customer")]
+        [HttpGet]
+        public IActionResult VaultSecure(Guid id)
+        {
+            // get piranha model info
+            var model = _api.Pages.GetById<Models.VaultSecure>(id);
+
+            // add the information from our user account
+            ClaimsPrincipal currentUser = this.User;
+            using (var dbms = new WebDataLayer.DBMS.WebDataLayerContext())
+            {
+                var license = dbms.License.FirstOrDefault(r => r.Email == currentUser.Identity.Name);
+                if (license != null)
+                {
+                    //model.LicenseInfo = license;
+                    model.LicenseEmail = license.Email;
+                    model.LicenseName = license.Name;
+                    model.LicensePhoneNumber = license.PhoneNumber;
+                    model.LicenseMaxDevicesSupported = license.MaxDevicesSupported.Value;
+                    model.DeviceInfo = dbms.Device
+                        .Include(r => r.DeviceInformation)
+                        .Where(r => r.LicenseId == license.LicenseId)
+                        .OrderBy(r => r.DeviceId).ToArray();
+                }
+            }
+            return View(model);
+        }
+        #endregion
+
+        #region helpers
+
+        /// <summary>
+        /// Adds a success message to the current view.
+        /// </summary>
+        /// <param name="msg">The message</param>
+        /// <param name="persist">If the message should be persisted in TempData</param>
+        protected void SuccessMessage(string msg, bool persist = true)
+        {
+            msg = "<b>Success:</b> " + msg;
+
+            ViewBag.MessageCss = "alert alert-success";
+            ViewBag.Message = msg;
+            if (persist)
+            {
+                TempData["MessageCss"] = "alert alert-success";
+                TempData["Message"] = msg;
+            }
+        }
+
+        /// <summary>
+        /// Adds an error message to the current view.
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="persist">If the message should be persisted in TempData</param>
+        protected void ErrorMessage(string msg, bool persist = true)
+        {
+            msg = "<b>Error:</b> " + msg;
+
+            ViewBag.MessageCss = "alert alert-danger";
+            ViewBag.Message = msg;
+            if (persist)
+            {
+                TempData["MessageCss"] = "alert alert-danger";
+                TempData["Message"] = msg;
+            }
+        }
+
+        /// <summary>
+        /// Adds an information message to the current view.
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="persist">If the message should be persisted in TempData</param>
+        protected void InformationMessage(string msg, bool persist = true)
+        {
+            msg = "<b>Information:</b> " + msg;
+
+            ViewBag.MessageCss = "alert alert-info";
+            ViewBag.Message = msg;
+            if (persist)
+            {
+                TempData["MessageCss"] = "alert alert-info";
+                TempData["Message"] = msg;
+            }
+        }
+
+        protected void SetupViewData()
+        {
+            if (TempData.ContainsKey("MessageCss"))
+            {
+                ViewBag.MessageCss = TempData["MessageCss"];
+                TempData.Remove("MessageCss");
+            }
+            if (TempData.ContainsKey("Message"))
+            {
+                ViewBag.Message = TempData["Message"];
+                TempData.Remove("Message");
+            }
+        }
+
+        #endregion
+
+        #endregion
+
+
+    }
+}

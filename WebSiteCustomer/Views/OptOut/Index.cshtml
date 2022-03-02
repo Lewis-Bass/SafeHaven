@@ -1,0 +1,66 @@
+﻿@model OptOutData
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="container body-container">
+    <form method="post">
+        <div class="panel-heading">
+            <h3 class="panel-title">The System Tracks</h3>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <label>
+                    @Html.CheckBoxFor(m => m.IsBIOSTracked)&nbsp;BIOS
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <label>
+                    @Html.CheckBoxFor(m => m.IsCPUTracked)&nbsp;CPU
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <label>
+                    @Html.CheckBoxFor(m => m.IsDRIVETracked)&nbsp;Disk Drive
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <label>
+                    @Html.CheckBoxFor(m => m.IsMBTracked)&nbsp;Memory
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <label>
+                    @Html.CheckBoxFor(m => m.IsNETTracked)&nbsp;Networking
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <label>
+                    @Html.CheckBoxFor(m => m.IsOSTracked)&nbsp;Operating System
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 buttons">
+                <button type="submit" class="btn btn-labeled btn-success pull-right">
+                    <span class="btn-label">
+                        <i class="fas fa-check"></i>
+                    </span>
+                    <text>Update</text>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+

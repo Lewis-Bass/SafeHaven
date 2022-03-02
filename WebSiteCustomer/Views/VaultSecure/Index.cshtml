@@ -1,0 +1,179 @@
+﻿@model WebDataLayer.Models.VaultSecure
+@{
+    ViewData["Title"] = "VaultSecure";
+}
+
+<div class="container body-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-xs-12">
+
+            @Html.AntiForgeryToken()
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">License Information</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            Name
+                        </div>
+                        <div class="col-sm-3">
+                            @Html.DisplayFor(m => m.LicenseName)
+                        </div>
+                        <div class="col-sm-3">
+                            Email
+                        </div>
+                        <div class="col-sm-3">
+                            @Html.DisplayFor(m => m.LicenseEmail)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            Phone
+                        </div>
+                        <div class="col-sm-3">
+                            @Html.DisplayFor(m => m.LicensePhoneNumber)
+                        </div>
+                        <div class="col-sm-3">
+                            Max Devices
+                        </div>
+                        <div class="col-sm-3">
+                            @Html.DisplayFor(m => m.LicenseMaxDevicesSupported)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Vault Information</h3>
+                </div>
+                <div class="panel-body">
+                    @if (Model.DeviceInfo != null)
+                    {
+                        foreach (var device in Model.DeviceInfo.OrderBy(r => r.Name))
+                        {
+                            <div style="border:solid 2px black;">
+
+                                <!-- computer/device information -->
+                                <div class="row">
+
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>
+                                                @device.Name
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <form method="post">
+                                        @Html.Hidden(device.DeviceId)
+
+                                        @if (device.IsDeviceExpired)
+                                        {
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <button type="submit" value="@device.DeviceId"
+                                                            asp-controller="VaultSecure" asp-action="VaultSecureDeviceActivate"
+                                                            asp-route-id="@device.DeviceId"
+                                                            class="btn btn-labeled btn-success pull-right">
+                                                        <span class="btn-label">
+                                                            <i class="fas fa-check"></i>
+                                                        </span>
+                                                        <text>Activate Device</text>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (!device.IsDeviceExpired)
+                                        {
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+
+                                                    @Html.Hidden(device.DeviceId)
+                                                    <button type="submit" value="DeviceOffline" asp-area=""
+                                                            asp-controller="VaultSecure" asp-action="VaultSecureDeviceOffline"
+                                                            asp-route-id="@device.DeviceId"
+                                                            class="btn btn-labeled btn-success pull-right">
+                                                        <span class="btn-label">
+                                                            <i class="fas fa-check"></i>
+                                                        </span>
+                                                        <text>Take Device Offline</text>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        }
+                                    </form>
+                                </div>
+
+                                <!-- vault information -->
+                                @if (device.DeviceArk != null)
+                                {
+                                    foreach (var ark in device.DeviceArk.OrderBy(r => r.ArkName))
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    &nbsp;
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>
+                                                        @ark.ArkName
+                                                    </label>
+                                                    &nbsp;
+                                                </div>
+                                            </div>
+                                            <form method="post">
+                                                @if (ark.IsDisabled)
+                                                {
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <button type="submit" value="ArkActivate"
+                                                                    asp-controller="VaultSecure" asp-action="VaultSecureArkActivate"
+                                                                    asp-route-id="@ark.ArkId"
+                                                                    class="btn btn-labeled btn-success pull-right">
+                                                                <span class="btn-label">
+                                                                    <i class="fas fa-check"></i>
+                                                                </span>
+                                                                <text>Activate</text>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                @if (!ark.IsDisabled)
+                                                {
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <button type="submit" value="ArkOffline"
+                                                                    asp-controller="VaultSecure" asp-action="VaultSecureArkOffline"
+                                                                    asp-route-id="@ark.ArkId"
+                                                                    class="btn btn-labeled btn-success pull-right">
+                                                                <span class="btn-label">
+                                                                    <i class="fas fa-check"></i>
+                                                                </span>
+                                                                <text>Take Offline</text>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </form>
+                                        </div>
+                                    }
+                                }
+
+                            </div>
+                        }
+                    }
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+

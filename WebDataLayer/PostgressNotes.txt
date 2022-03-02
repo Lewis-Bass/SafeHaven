@@ -1,0 +1,15 @@
+﻿dopostgres super user
+2conjoKids password
+port 5432
+
+The Npgsql EF Core provider also supports reverse-engineering a code model from an existing PostgreSQL database ("database-first"). To do so, use dotnet CLI to execute the following:
+https://medium.com/@RobertKhou/getting-started-with-entity-framework-core-postgresql-c6fa09681624
+to reverse engineer the dbms use the following command line
+dotnet ef dbcontext scaffold "Host=127.0.0.1;Database=WebDataLayer;Username=postgres;Password=2conjoKids" Npgsql.EntityFrameworkCore.PostgreSQL -o DBMS -f
+
+To dump the schema use
+pg_dump --schema-only --no-owner --username=postgres --password WebDataLayer > schema.sql
+
+
+to update the database in a code first way use 
+dotnet ef database update
